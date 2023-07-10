@@ -1,0 +1,122 @@
+#Load the packages
+library('readr')
+library('dplyr')
+
+# Read in the data from the datasets folder
+wwc_raw <- read_csv("datasets/2019_WWCFIFA_summary.csv")
+
+# Check the dimensions and structure of the data
+glimpse(wwc_raw)
+summary(wwc_raw)
+str(wwc_raw)
+
+# Read in the data specifying column types
+wwc_raw <- read_csv("datasets/2019_WWCFIFA_summary.csv",
+                col_types = cols(
+                                Round = col_factor(),
+                                Date = col_date(format = "%m/%d/%y"),
+                                Venue = col_factor() 
+                                  )
+                 )
+
+# Look at the summary and structure of the data
+glimpse(wwc_raw)
+summary(wwc_raw)
+str(wwc_raw)
+View(wwc_raw)
+
+# Print the dataset
+print(wwc_raw)
+
+# Load the package
+library(tidyr)
+
+# Remove rows of NA
+wwc_1  <- wwc_raw  %>% 
+ rename_all(tolower) %>% 
+ filter(!is.na(round) & !is.na(attendance) & !is.na(date) & !is.na(venue))
+
+# Get the dimensions and inspect the first 10 and last 10 rows
+head(wwc_1)
+tail(wwc_1)
+dim(wwc_1)
+
+# Housekeeping
+colSums(is.na(wwc_1))
+wwc_2  <- wwc_1
+
+# Find and replace NA in column date
+# Find and replace NA in column venue
+#No NA's
+
+# Housekeeping
+soln_wwc_2 <- soln_wwc_1
+
+# Find and replace NA in column date
+soln_index_date  <- which(is.na(soln_wwc_2$date))
+soln_wwc_2$date[soln_index_date] <- "2019-06-09"
+
+# Find and replace NA in column venue
+soln_index_venue  <- which(is.na(soln_wwc_2$venue))
+soln_wwc_2$venue[soln_index_venue] <- "Groupama Stadium"
+
+# Separate columns and replace NA (you've got this!)
+wwc_3  <- wwc_2 %>% 
+  separate(score, into = c("home_score", "away_score"), sep = "-", remove = FALSE)  %>% 
+  separate(pks, into = c("home_pks", "away_pks"), sep = "-", remove = FALSE)  %>% 
+    mutate(home_pks = replace_na(NA, 0), away_pks = replace_na(NA, 0))
+
+# Print the data
+wwc_3
+
+# Housekeeping for plot size
+options(repr.plot.width=6, repr.plot.height=4)
+
+# Load the package
+install.packages("ggplot2")
+library(ggplot2)
+
+# Make a boxplot of attendance by venue and add the point data
+ggplot(wwc_3, aes(x = attendance, y = venue)) +
+    geom_boxplot() +
+    geom_jitter(color = "red", size = 0.5) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+# Summarize the number of games, and min and max attendance for each venue
+wwc_3 %>%
+    group_by(venue) %>% 
+    summarize(
+        max = max(attendance),
+        min = min(attendance)
+        )
+
+# Correct the outlier
+wwc_4  <- wwc_3  %>% 
+          mutate(attendance = ifelse(attendance == max(attendance), max(attendance) / 10, attendance))
+
+# Print an updated summary table
+wwc_venue_summary <- wwc_4  %>% 
+                     group_by(venue) %>%
+                     summarise(
+                     number_of_games = count(),
+                     max = max(attendance),
+                     min = min(attendance))
+
+# Housekeeping for plot size
+options(repr.plot.width=6, repr.plot.height=4)
+
+# Prettier boxplot of attendance data by venue
+wwc_4  %>% 
+  ggplot(aes(x = forcats::fct_reorder(venue, attendance), y = attendance )) +
+    geom_boxplot() +
+    geom_jitter(color = "red", size = 0.5) +
+    coord_flip() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title = "Distribution of attendance by stadium",
+         subtitle = "2019 FIFA Women's World Cup",
+         x = "Stadium", 
+         y = "Attendance")
+
+# Housekeeping for plot size
+options(repr.plot.width=6, repr.plot.height
+
