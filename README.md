@@ -23,8 +23,6 @@ This R code analyzes the attendance data of the 2019 FIFA Women's World Cup. It 
 
 To use this code, make sure you have the necessary packages (`readr`, `dplyr`, `tidyr`, and `ggplot2`) installed. You can modify the file path in the code to match the location of the input dataset. Run the code in an R environment or an R script to perform the data analysis and generate visualizations.
 
-Please note that this code assumes the presence of the "datasets/2019_WWCFIFA_summary.csv" file, which contains the attendance data for the 2019 FIFA Women's World Cup. If you're using a different dataset, make sure to modify the file path and adjust the code accordingly.
-
 Feel free to explore and modify the code to suit your specific requirements and analysis needs.
 
 ### License
