@@ -117,6 +117,204 @@ wwc_4  %>%
          x = "Stadium", 
          y = "Attendance")
 
-# Housekeeping for plot size
-options(repr.plot.width=6, repr.plot.height
+# Housekeeping
+colSums(is.na(wwc_1))
+wwc_2  <- wwc_1
 
+# Find, view, and replace NA in column date
+# Find, view, and replace NA in column venue
+#No NA'S
+# .... YOUR CODE FOR TASK 4 ....
+#No N/As
+
+# Housekeeping
+soln_wwc_2 <- soln_wwc_1
+
+# Find and replace NA in column date
+soln_index_date  <- which(is.na(soln_wwc_2$date))
+soln_wwc_2$date[soln_index_date] <- "2019-06-09"
+
+# Find and replace NA in column venue
+soln_index_venue  <- which(is.na(soln_wwc_2$venue))
+soln_wwc_2$venue[soln_index_venue] <- "Groupama Stadium"
+
+run_tests({
+    test_that("ind_dt is correct", {
+        expect_equal(index_date, soln_index_date, 
+            info = "ind_dt is not correct. Check the hint to make sure you used which() and is.na() correctly.")
+        expect_equal(index_venue, soln_index_venue, 
+            info = "ind_vn is not correct. Check the hint to make sure you used which() and is.na() correctly.")
+    })
+   test_that("wwc_2 is correct", {
+       expect_equal(wwc_2, soln_wwc_2, 
+            info = "wwc_2 is not correct. Check the hint to make sure you filled in the NAs correctly.")
+   })
+})
+
+# Separate columns and replace NA (you've got this!)
+
+wwc_3  <- wwc_2 %>% 
+  separate(score, into = c("home_score", "away_score"), sep = "-", remove = FALSE)  %>% 
+  separate(pks, into = c("home_pks", "away_pks"), sep = "-", remove = FALSE)  %>% 
+    mutate(home_pks = replace_na(NA,0), away_pks = replace_na(NA,0))
+
+
+
+# Print the data
+wwc_3
+
+soln_wwc_3  <- soln_wwc_2  %>% 
+  separate(score, c("home_score", "away_score"), sep =  "-", convert = TRUE)  %>% 
+  separate(pks, c("home_pks", "away_pks"), sep = "-", convert = TRUE)  %>% 
+  mutate(home_pks = replace_na(home_pks, 0),
+         away_pks = replace_na(away_pks, 0))
+
+# Housekeeping for plot size
+options(repr.plot.width=6, repr.plot.height=4)
+
+# Load the package
+install.packages("ggplot2")
+library(ggplot2)
+
+# Make a boxplot of attendance by venue and add the point data
+gg_plot(wwc_3, aes(x= attendance, y = venue)) +
+    geom_boxplot()+
+    geom_jitter(color = "red", size = 0.5) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+p  <-  last_plot()
+
+soln_p  <- ggplot(soln_wwc_3, aes(venue, attendance)) +
+  geom_boxplot() +
+  geom_jitter(color = "red", size = 0.5) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+# Summarize the number of games, and min and max attendance for each venue
+
+#Correct
+wwc_3 %>%
+    group_by(venue) %>% 
+    summarize(
+        max = max(attendance),
+        min = min(attendance)
+        )
+
+# Correct the outlier
+wwc_4  <- wwc_3  %>% 
+          mutate(attendance = ifelse(attendance == max(attendance), max(attendance) / 10, attendance))
+# Print an updated summary table 
+wwc_venue_summary <- wwc_4  %>% 
+                     group_by(venue) %>%
+                     summarise(
+                     number_of_games =count(),
+                     max = max(attendance),
+                     min = min(attendance))
+
+soln_wwc_4  <- soln_wwc_3  %>% 
+  mutate(attendance = replace(attendance, which(attendance == 579000), 57900))
+
+soln_wwc_venue_summary  <- soln_wwc_4 %>% 
+  group_by(venue)  %>% 
+  summarize(nb_of_games = n(), 
+           min_attendance = min(attendance), 
+           max_attendance = max(attendance))
+
+# Housekeeping for plot size
+options(repr.plot.width=6, repr.plot.height=4)
+
+# Prettier boxplot of attendance data by venue
+wwc_4  %>% 
+  ggplot(aes(x = forcats::fct_reorder(venue, attendance), y = attendance )) +
+    geom_boxplot()+
+    geom_jitter(color = "red", size = 0.5) +
+    coord_flip() +
+    theme(axis.text.x = element_text(angle = 45, , hjust = 1)) +
+    labs( title = "Distribution of attendance by stadium",
+             subtitle = "2019 FIFA Women's World Cup",
+             x = "Stadium", 
+             y = "Attendance")
+
+
+
+p  <- last_plot()
+
+soln_4_bp  <- soln_wwc_4  %>% 
+  ggplot(aes(forcats::fct_reorder(venue, attendance), attendance)) +
+  geom_boxplot() +
+  geom_jitter(color = "red", size = 0.5) +
+  coord_flip() +
+  theme(axis.text.x = element_text(angle = 45, , hjust = 1)) +
+  labs(title = "Distribution of attendance by stadium",
+       subtitle = "2019 FIFA Women's World Cup",
+       x = "Stadium", 
+       y = "Attendance")
+
+# Housekeeping for plot size
+options(repr.plot.width=6, repr.plot.height=4)
+
+# Line plot of attendance over time
+wwc_4  %>% 
+  ggplot(aes(x = date, y = attendance), color = venue) +
+  geom_line() +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+       legend.text = element_text(size = 8)) +
+  guides(col = guide_legend(nrow = 3)) +
+  labs(title = "Stadium attendance during the tournament",
+       subtitle = "2019 FIFA Women's World Cup",
+       x = "Date", 
+       y = "Attendance",
+      color = "venue") 
+
+
+
+p  <-  last_plot()
+
+soln_4_lp  <- soln_wwc_4  %>% 
+  ggplot(aes(date, attendance, color = venue)) +
+  geom_line() +
+  theme(legend.position = "bottom",
+       legend.text = element_text(size = 8)) +
+  guides(col = guide_legend(nrow = 3)) +
+  labs(title = "Stadium attendance during the tournament",
+       subtitle = "2019 FIFA Women's World Cup",
+       x = "Date", 
+       y = "Attendance",
+      color = "") 
+
+
+# What match had the higest attendance?
+# A: wk = SMIF, England vs. USA
+# B: wk = FIN, USA vs. Netherlands
+# C: wk = SMIF, Netherlands vs. Sweden
+
+
+# Find the match with the highest attendance
+match_highest_attendance <- wwc_4 %>%
+  filter(attendance == max(attendance))
+
+# Get the stadium of the match with the highest attendance
+stadium_highest_attendance <- match_highest_attendance$venue
+
+# Print the match and stadium information
+cat("Match with the highest attendance:", match_highest_attendance$home, "vs.", match_highest_attendance$away, "\n")
+cat("Stadium of the match:", stadium_highest_attendance, "\n")
+        
+
+# In what stadium was the match with the highest attendance played?
+# A: Groupama Stadium
+# B: Parc des Princes
+# C: Stade des Alpes
+
+ans_2  <- "Groupama Stadium"
+
+run_tests({
+    test_that("ans_1 is correct", {
+        expect_true(ans_1 == "B", 
+            info = "The correct answer is B, the Final between the USA and the Netherlands had the greatest attendance.")
+    })
+    test_that("ans_2 is correct", {
+        expect_true(ans_2 == "A", 
+            info = "The correct answer is A, Groupama Stadium.")
+    })
+})
